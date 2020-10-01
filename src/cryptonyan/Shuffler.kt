@@ -61,21 +61,20 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
      */
     private fun columnShuffle(table: Array<Array<Char>>): String{
         val tmp = Array(table.size * table[0].size) {'|'}
+        var index = 0
         for (j in table[0].indices) {
             for (i in table.indices) {
-                tmp[i * keysSize + this.firstKey[j] - 1] = table[i][j]
+                tmp[index] = table[i][firstKey[j]-1]
+                index++
             }
         }
         return tmp.joinToString(separator = "")
     }
 
     private fun rowShuffle(table: Array<Array<Char>>): String{
-        val tmp = Array(table.size) {Array(table[0].size) {'|'} }
         var result = ""
         for (i in table.indices)
-            tmp[secondKey[i] - 1] = table[i]
-        for (i in tmp.indices)
-            result += tmp[i].joinToString(separator = "")
+            result += table[secondKey[i]-1].joinToString(separator = "")
         return result
     }
 
@@ -88,9 +87,11 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
         val rowCount = ceil(text.length.toFloat() / keysSize).toInt()
         val columnCount = keysSize
         val chars = Array(rowCount) { Array(columnCount) {'|'} }
+        var index = 0
         for (j in chars[0].indices)
             for (i in chars.indices) {
-                chars[i][j] = text[i * keysSize + this.firstKey[j] - 1]
+                chars[i][firstKey[j]-1] = text[index]
+                index++
             }
         return chars
     }
@@ -101,9 +102,11 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
         val rowCount = keysSize
         val columnCount = ceil(text.length.toFloat() / keysSize).toInt()
         val chars = Array(rowCount) { Array(columnCount) {'|'} }
+        var index = 0
         for (i in chars.indices)
             for (j in chars[i].indices) {
-                chars[i][j] = text[(this.secondKey[i]-1) * chars[i].size + j]
+                chars[secondKey[i]-1][j] = text[index]
+                index++
             }
         return chars
     }
