@@ -14,6 +14,9 @@ class Feistel(private val keyString: String) {
         generateKeys()
     }
 
+    /**
+     * Encrypts input data
+     */
     fun encrypt(data: ByteArray): ByteArray{
         val blocks = separateToBlocks(data)
         for (i in blocks.indices){
@@ -25,6 +28,9 @@ class Feistel(private val keyString: String) {
         return restoreSeparatedArray(blocks)
     }
 
+    /**
+     * Decrypts encrypted data
+     */
     fun decrypt(data: ByteArray): ByteArray{
         if (data.size % blockSize != 0)
             throw Nyanception("Cannot decrypt text. Text length doesn't multiple to block size")
@@ -35,9 +41,13 @@ class Feistel(private val keyString: String) {
                 blocks[i] = doReversedRound(flow1, flow2, flow3, flow4, j)
             }
         }
-        return restoreSeparatedArray(blocks)
+        return restoreSeparatedArray(blocks, true)
     }
 
+    /**
+     * Does one round of Feistel's network to encrypt data
+     * Returns block (128 bits) of data
+     */
     private fun doRound(f1: ByteArray, f2: ByteArray, f3: ByteArray, f4: ByteArray, roundNum: Int):Array<ByteArray> {
         val result = Array(flowCount) {ByteArray(flowSize)}
         var tmp: Byte
@@ -52,6 +62,10 @@ class Feistel(private val keyString: String) {
         return result
     }
 
+    /**
+     * Does one reversed round of Feistel's network to decrypt data
+     * Returns block (128 bits) of data
+     */
     private fun doReversedRound(f1: ByteArray, f2: ByteArray, f3: ByteArray, f4: ByteArray, roundNum: Int):Array<ByteArray> {
         val result = Array(flowCount) {ByteArray(flowSize)}
         var tmp: Byte
@@ -66,6 +80,11 @@ class Feistel(private val keyString: String) {
         return result
     }
 
+    /**
+     * Separates input data to blocks 128 bits
+     * Every block separated to 4 flows 32 bits
+     * Extends input data to size multiple by block size
+     */
     private fun separateToBlocks(data: ByteArray): Array<Array<ByteArray>> {
         val rowCount = ceil(data.size.toFloat() / blockSize).toInt()
         val blocks = Array(rowCount){Array(flowCount) { ByteArray(flowSize) } }
@@ -85,8 +104,12 @@ class Feistel(private val keyString: String) {
         return blocks
     }
 
-    private fun restoreSeparatedArray(blocks: Array<Array<ByteArray>>): ByteArray {
-        val result = ByteArray(blocks.size * blocks[0].size * blocks[0][0].size)
+    /**
+     * Convert block and flows to single Byte Array
+     * Trims last block from extend data
+     */
+    private fun restoreSeparatedArray(blocks: Array<Array<ByteArray>>, trim: Boolean=false): ByteArray {
+        var result = ByteArray(blocks.size * blocks[0].size * blocks[0][0].size)
         var index = 0
         for (i in blocks.indices)
             for (j in blocks[i].indices)
@@ -96,9 +119,13 @@ class Feistel(private val keyString: String) {
                         index++
                     }
                 }
-        return result.sliceArray(0 until index)
+        if (trim) result = result.sliceArray(0 until index)
+        return result
     }
 
+    /**
+     * Does cyclic right shift of Byte Array
+     */
     private fun cyclicShiftR(a: Array<Byte>, shift:Int): Array<Byte>{
         val result = Array<Byte>(a.size) {0}
         for (i in result.indices)
@@ -106,6 +133,9 @@ class Feistel(private val keyString: String) {
         return result
     }
 
+    /**
+     * Generate 16 keys by 32 bits from 128 bits key
+     */
     private fun generateKeys(){
         val keyBytes = keyString.toByteArray()
         if (keyBytes.size != blockSize)

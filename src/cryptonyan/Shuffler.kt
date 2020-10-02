@@ -71,6 +71,10 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
         return tmp.joinToString(separator = "")
     }
 
+    /**
+     * Shuffle rows by key
+     * Returns encrypted text string
+     */
     private fun rowShuffle(table: Array<Array<Char>>): String{
         var result = ""
         for (i in table.indices)
@@ -79,7 +83,7 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
     }
 
     /**
-     * Builds table of text chars, column by columns by key
+     * Restore shuffled table by columns from string with key
      */
     private fun restoreColumnShuffledTable(text: String): Array<Array<Char>>{
         if (text.length % keysSize != 0)
@@ -96,6 +100,9 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
         return chars
     }
 
+    /**
+    * Restore shuffled table by rows from string with key
+    */
     private fun restoreRowShuffledTable(text: String): Array<Array<Char>>{
         if (text.length % keysSize != 0)
             throw Nyanception("Cannot decrypt text. Text length doesn't multiple to key size")
@@ -124,14 +131,5 @@ class Shuffler(private val firstKey: IntArray, private val secondKey: IntArray) 
             }
         }
         return tmp.joinToString(separator = "")
-    }
-
-    private fun printMatrix(m: Array<Array<Char>>){
-        for (row in m){
-            for (c in row){
-                print(c)
-            }
-            println()
-        }
     }
 }
